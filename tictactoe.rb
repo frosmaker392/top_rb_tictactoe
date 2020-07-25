@@ -1,13 +1,3 @@
-class Cell
-  # content - represents which player has filled in the cell
-  # 1 - Player 1, 2 - Player 2
-  attr_accessor :content
-
-  def initialize
-    @content = 0
-  end
-end
-
 class TicTacToe
   attr_reader :n
   attr_reader :finished
@@ -16,26 +6,27 @@ class TicTacToe
   # Initialize a Tic Tac Toe board of grid_size * grid_size (aka n * n)
   def initialize(grid_size)
     @finished = false
-    @player_1s_turn = true
+    @player_1s_turn = [true, false].sample
 
     @n = grid_size
-    @cells_grid = Array.new(@n) do |x|
-      Array.new(@n) do |y|
-        Cell.new
-      end
+    @cells_grid = Array.new(@n) do |y|
+      Array.new(@n) { |x| 0}
     end
+
+    puts "Player 1 - X, Player 2 - O"
     
-    debug
+    print_board
     game_loop
   end
 
   private
 
+  # Main game loop
   def game_loop
     until finished
       i_tuple = prompt_player
-      @cells_grid[i_tuple[0]][i_tuple[1]].content = @player_1s_turn ? 1 : 2
-      debug
+      @cells_grid[i_tuple[0]][i_tuple[1]] = @player_1s_turn ? 1 : 2
+      print_board
 
       @player_1s_turn = !@player_1s_turn
     end
@@ -45,15 +36,14 @@ class TicTacToe
   # Returns the intended cell indices
   def prompt_player
     valid = false     # Flag to stop reprompting when input is valid
-    x = -1
-    y = -1
+    x, y = -1
 
-    print "Player #{@player_1s_turn ? 1 : 2}'s turn (#{@player_1s_turn ? 'O' : 'X'}) : "
+    print "Player #{@player_1s_turn ? 1 : 2}'s turn (#{@player_1s_turn ? 'X' : 'O'}) : "
 
     # Repeat input prompt until input is valid
     until valid
       player_input = gets.chomp
-      player_input = player_input.gsub(' ', '').capitalize
+      player_input = player_input.tr(' ', '').capitalize
 
       x = player_input[0].ord - 65
       y = (player_input[1] =~ /[[:digit:]]/) == 0 ? player_input[1].to_i - 1 : nil;
@@ -61,21 +51,45 @@ class TicTacToe
       if player_input.length != 2 || x < 0 || x > n - 1 || y < 0 || y > n - 1 || y.nil?
         print "Invalid input, TRY ANOTHER! : "
         next
-      elsif @cells_grid[x][y].content != 0
+      elsif @cells_grid[x][y] != 0
         print "Cell occupied, TRY ANOTHER! : "
         next
       end
 
       valid = true
     end
+    
+    [x, y]
+  end
 
-    return [x, y]
+  # Prints the current state of the board
+  def print_board
+    # Print top number row
+    print '    '
+    (1..@n).each { |x| print "#{x} "}
+    print "\n\n"
+
+    # Print letter column and board
+    (0..@n - 1).each do |y|
+      letter = (97 + y).chr
+      print " #{letter}  "
+
+      (0..@n - 1).each do |x|
+        if @cells_grid[y][x] == 0
+          print "  "
+        else
+          print "#{@cells_grid[y][x] == 1 ? 'X' : 'O'} "
+        end
+      end
+
+      print "\n"
+    end
   end
 
   def debug
     @cells_grid.each do |row|
       row.each do |element|
-        print "#{element.content} "
+        print "#{element} "
       end
       print "\n"
     end
