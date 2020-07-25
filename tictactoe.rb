@@ -1,3 +1,42 @@
+# Helper class to store board information and organize some methods
+class GridOfCells
+  attr_reader :n
+  attr_reader :cells_rows
+  attr_reader :cells_columns
+  attr_reader :cells_diagonals
+
+  # Initialize a 2D n x n array of 0s
+  def initialize(n)
+    @n = n
+    @cells_rows = Array.new(n) { Array.new(n) { 0 } }
+    @cells_columns = Array.new(n) { Array.new(n) { 0 } }
+    @cells_diagonals = Array.new(2) { Array.new(n) { 0 } }
+  end
+
+  public
+
+  def [](x)
+    @cells_rows[x]
+  end
+
+  def update_cell(row, col, val)
+    @cells_rows[row][col] = val
+    @cells_columns[col][row] = val
+    
+    if row == col then @cells_diagonals[0][row] = val
+    elsif n - 1 - col == row then @cells_diagonals[1][row] = val
+    end
+  end
+
+  private
+
+  def debug
+    puts "Rows : #{@cells_rows}"
+    puts "Cols : #{@cells_columns}"
+    puts "Diags : #{@cells_diagonals}"
+  end
+end
+
 class TicTacToe
   attr_reader :n
   attr_reader :finished
@@ -12,9 +51,7 @@ class TicTacToe
     @player_1s_turn = [true, false].sample
 
     @n = grid_size
-    @cells_grid = Array.new(@n) do |y|
-      Array.new(@n) { |x| 0}
-    end
+    @cells_grid = GridOfCells.new(@n)
 
     puts  "  ------  Tic Tac Toe (#{@n} x #{@n})  ------  \n"\
           "-- How to Play :\n'"\
@@ -36,13 +73,16 @@ class TicTacToe
 
   # Main game loop
   def game_loop
-    until finished
+    until @finished
       i_tuple = prompt_player
-      @cells_grid[i_tuple[0]][i_tuple[1]] = @player_1s_turn ? 1 : 2
+      @cells_grid.update_cell(i_tuple[0], i_tuple[1], @player_1s_turn ? 1 : 2) 
+
       print_board
 
       @player_1s_turn = !@player_1s_turn
     end
+
+    puts @result
   end
 
   # Prompts the current player where to put his/her/its O/X
@@ -80,14 +120,14 @@ class TicTacToe
   # Prints the current state of the board
   def print_board
     # Print top number row
-    print "\n    "
+    print "\n       "
     (1..@n).each { |x| print "#{x} "}
     print "\n\n"
 
     # Print letter column and board
     (0..@n - 1).each do |y|
       letter = (97 + y).chr
-      print " #{letter}  "
+      print "    #{letter}  "
 
       (0..@n - 1).each do |x|
         if @cells_grid[y][x] == 0
