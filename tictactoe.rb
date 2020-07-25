@@ -5,12 +5,16 @@ class GridOfCells
   attr_reader :cells_columns
   attr_reader :cells_diagonals
 
+  attr_reader :filled_cells
+
   # Initialize a 2D n x n array of 0s
   def initialize(n)
     @n = n
     @cells_rows = Array.new(n) { Array.new(n) { 0 } }
     @cells_columns = Array.new(n) { Array.new(n) { 0 } }
     @cells_diagonals = Array.new(2) { Array.new(n) { 0 } }
+
+    @filled_cells = 0
   end
 
   public
@@ -26,6 +30,12 @@ class GridOfCells
     if row == col then @cells_diagonals[0][row] = val
     elsif n - 1 - col == row then @cells_diagonals[1][row] = val
     end
+
+    @filled_cells += 1
+  end
+
+  def is_full?
+    @filled_cells == @n * @n
   end
 
   private
@@ -52,18 +62,21 @@ class TicTacToe
 
     @n = grid_size
     @cells_grid = GridOfCells.new(@n)
+  end
 
+  def start
     puts  "  ------  Tic Tac Toe (#{@n} x #{@n})  ------  \n"\
           "-- How to Play :\n'"\
           "> The game will prompt you where to place your O/X on the board.\n"\
           "> When prompted, enter the desired position in the following format :\n"\
           "  - [row letter] [column number]\n"\
           "  - e.g : a3, B1, C 3, a 4\n"\
-          "  - invalid entries : 3A, 13, there"
+          "  - invalid entries : 3A, 13, here\n"\
           "> The first one to get #{@n} Os/Xs in a line wins\n"\
           "> Type 'exit' or 'quit' (case-insensitive) to quit mid-game.\n"\
           "---------------------------------------"
     puts "Player 1 - X, Player 2 - O"
+    puts "Player #{@player_1s_turn ? 1 : 2} start!"
     
     print_board
     game_loop
@@ -75,14 +88,65 @@ class TicTacToe
   def game_loop
     until @finished
       i_tuple = prompt_player
-      @cells_grid.update_cell(i_tuple[0], i_tuple[1], @player_1s_turn ? 1 : 2) 
+      @cells_grid.update_cell(i_tuple[0], i_tuple[1], @player_1s_turn ? 1 : 2)
 
       print_board
-
+      check_board
       @player_1s_turn = !@player_1s_turn
     end
 
     puts @result
+  end
+
+  def check_board
+    @cells_grid.cells_rows.each do |row|
+      found = has_same_values?(row)
+
+      if found
+        @result = row[0]
+        @finished = true
+        return
+      end
+    end
+
+    @cells_grid.cells_columns.each do |col|
+      found = has_same_values?(col)
+
+      if found
+        @result = col[0]
+        @finished = true
+        return
+      end
+    end
+
+    @cells_grid.cells_diagonals.each do |diag|
+      found = has_same_values?(diag)
+
+      if found
+        @result = diag[0]
+        @finished = true
+        return
+      end
+    end
+
+    if @cells_grid.is_full?
+      @result = 0
+      @finished = true
+    end
+  end
+
+  # Checks the whole array if it is non-empty and has the same values
+  def has_same_values? (array)
+    same = true
+
+    array.each do |element|
+      if element != array[0] || element == 0
+        same = false
+        break
+      end
+    end
+
+    same
   end
 
   # Prompts the current player where to put his/her/its O/X
@@ -139,6 +203,8 @@ class TicTacToe
 
       print "\n"
     end
+
+    print "\n"
   end
 
   def debug
@@ -152,3 +218,4 @@ class TicTacToe
 end
 
 tic_tac_toe = TicTacToe.new(4)
+tic_tac_toe.start
