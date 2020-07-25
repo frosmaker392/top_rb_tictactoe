@@ -3,6 +3,9 @@ class TicTacToe
   attr_reader :finished
   attr_reader :player_1s_turn
 
+  # 1 if player 1 wins, 2 if player 2 wins, 0 if draw
+  attr_reader :result
+
   # Initialize a Tic Tac Toe board of grid_size * grid_size (aka n * n)
   def initialize(grid_size)
     @finished = false
@@ -13,6 +16,16 @@ class TicTacToe
       Array.new(@n) { |x| 0}
     end
 
+    puts  "  ------  Tic Tac Toe (#{@n} x #{@n})  ------  \n"\
+          "-- How to Play :\n'"\
+          "> The game will prompt you where to place your O/X on the board.\n"\
+          "> When prompted, enter the desired position in the following format :\n"\
+          "  - [row letter] [column number]\n"\
+          "  - e.g : a3, B1, C 3, a 4\n"\
+          "  - invalid entries : 3A, 13, there"
+          "> The first one to get #{@n} Os/Xs in a line wins\n"\
+          "> Type 'exit' or 'quit' (case-insensitive) to quit mid-game.\n"\
+          "---------------------------------------"
     puts "Player 1 - X, Player 2 - O"
     
     print_board
@@ -43,7 +56,9 @@ class TicTacToe
     # Repeat input prompt until input is valid
     until valid
       player_input = gets.chomp
-      player_input = player_input.tr(' ', '').capitalize
+      player_input = player_input.tr(' ', '').upcase
+
+      exit(true) if player_input == 'EXIT' || player_input == 'QUIT'
 
       x = player_input[0].ord - 65
       y = (player_input[1] =~ /[[:digit:]]/) == 0 ? player_input[1].to_i - 1 : nil;
@@ -65,7 +80,7 @@ class TicTacToe
   # Prints the current state of the board
   def print_board
     # Print top number row
-    print '    '
+    print "\n    "
     (1..@n).each { |x| print "#{x} "}
     print "\n\n"
 
