@@ -68,10 +68,10 @@ class TicTacToe
     puts  "  ------  Tic Tac Toe (#{@n} x #{@n})  ------  \n"\
           "-- How to Play :\n'"\
           "> The game will prompt you where to place your O/X on the board.\n"\
-          "> When prompted, enter the desired position in the following format :\n"\
+          "> When prompted, enter the desired position like the following :\n"\
           "  - [row letter] [column number]\n"\
           "  - e.g : a3, B1, C 3, a 4\n"\
-          "  - invalid entries : 3A, 13, here\n"\
+          "  - invalid : 3A, 13, any word, any position out of the board\n"\
           "> The first one to get #{@n} Os/Xs in a line wins.\n"\
           "> Type 'exit' or 'quit' (case-insensitive) to quit mid-game.\n"\
           "---------------------------------------"
@@ -173,7 +173,7 @@ class TicTacToe
       exit(true) if player_input == 'EXIT' || player_input == 'QUIT'
 
       x = player_input[0].ord - 65
-      y = (player_input[1] =~ /[[:digit:]]/) == 0 ? player_input[1].to_i - 1 : nil;
+      y = player_input[1] =~ /^-?[0-9]+$/ ? player_input[1].to_i - 1 : nil;
 
       if player_input.length != 2 || x < 0 || x > n - 1 || y < 0 || y > n - 1 || y.nil?
         print "Invalid input, TRY ANOTHER! : "
@@ -267,4 +267,3 @@ end
 print "\n"
 tic_tac_toe = TicTacToe.new(n)
 tic_tac_toe.start
-
