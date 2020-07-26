@@ -72,7 +72,7 @@ class TicTacToe
           "  - [row letter] [column number]\n"\
           "  - e.g : a3, B1, C 3, a 4\n"\
           "  - invalid entries : 3A, 13, here\n"\
-          "> The first one to get #{@n} Os/Xs in a line wins\n"\
+          "> The first one to get #{@n} Os/Xs in a line wins.\n"\
           "> Type 'exit' or 'quit' (case-insensitive) to quit mid-game.\n"\
           "---------------------------------------"
     puts "Player 1 - X, Player 2 - O"
@@ -95,7 +95,15 @@ class TicTacToe
       @player_1s_turn = !@player_1s_turn
     end
 
-    puts @result
+    end_game
+  end
+
+  def end_game
+    if result == 0
+      puts "Draw! No one wins."
+    else
+      puts "Player #{@result} wins!"
+    end
   end
 
   def check_board
@@ -208,7 +216,7 @@ class TicTacToe
   end
 
   def debug
-    @cells_grid.each do |row|
+    @cells_grid.cells_rows.each do |row|
       row.each do |element|
         print "#{element} "
       end
@@ -217,5 +225,46 @@ class TicTacToe
   end
 end
 
-tic_tac_toe = TicTacToe.new(4)
+# Get user input and accept only numeric values between min and max
+def prompt_input_number(min, max, prompt_msg = nil, invalid_err_msg = nil)
+  prompt_msg = "Enter a number between #{min} and #{max} : " if prompt_msg.nil?
+  invalid_err_msg = "Invalid input, try again : " if invalid_err_msg.nil?
+  
+  print prompt_msg
+  
+  valid = false
+  number = 0
+  until valid
+    input = gets.chomp
+    number = input.to_i
+
+    if !(input =~ /^-?[0-9]+$/) || number < min || number > max
+      print invalid_err_msg
+      next
+    end 
+
+    valid = true
+  end 
+
+  number
+end
+
+diff_prompt_msg = "Choose difficulty :\n"\
+                  "1 - Normal (3 x 3), 2 - Hard (5 x 5)\n"\
+                  "3 - Harder (7 x 7), 4 - Custom (n x n)\n"\
+                  "Enter the difficulty number (1-4) : "
+
+diff_number = prompt_input_number(1, 4, diff_prompt_msg)
+
+n = -1
+if diff_number == 4
+  custom_prompt_msg = "Enter the desired board size, n (between 3 and 10) : "
+  n = prompt_input_number(3, 10, custom_prompt_msg)
+else
+  n = 1 + diff_number * 2
+end 
+
+print "\n"
+tic_tac_toe = TicTacToe.new(n)
 tic_tac_toe.start
+
